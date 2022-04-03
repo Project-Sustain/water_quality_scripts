@@ -1,0 +1,6 @@
+*.json
+larimerCounty/
+*.csv
+*.txt
+*.pyc
+station.py
