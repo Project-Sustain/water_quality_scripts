@@ -3,4 +3,4 @@ larimerCounty/
 *.csv
 *.txt
 *.pyc
-station.py
+*.geojson
