@@ -26,9 +26,10 @@ def getColoradoStateCoordinates():
 
 
 def formatAndWriteData(document, file):
-    del document['_id']
+    if '_id' in document:
+        del document['_id']
     outputFile = open(file, "a")
-    outputFile.write(json.dumps(document))
+    outputFile.write(json.dumps(document, indent=4))
     outputFile.write(',\n')
     outputFile.close()
 

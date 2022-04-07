@@ -3,16 +3,21 @@
 https://www.waterqualitydata.us/webservices_documentation/
 '''
 
+BASE_URL = '/s/parsons/b/others/sustain/matt/water_quality/coloradoState/download/data'
 
 import csv, os, requests, json
-state_file_path = os.path.expanduser('/s/parsons/b/others/sustain/matt/water_quality/coloradoState/download/data/apiMetadata/State.csv')
-county_file_path = os.path.expanduser('/s/parsons/b/others/sustain/matt/water_quality/coloradoState/download/data/apiMetadata/County.csv')
-characteristic_file_path = os.path.expanduser('/s/parsons/b/others/sustain/matt/water_quality/coloradoState/download/data/apiMetadata/Characteristic.csv')
-aperture_characteristics_file_paths_file_path = os.path.expanduser('/s/parsons/b/others/sustain/matt/water_quality/coloradoState/download/data/apiMetadata/CharacteristicsInAperture.json')
+state_file_path = os.path.expanduser(BASE_URL+'/apiMetadata/State.csv')
+county_file_path = os.path.expanduser(BASE_URL+'/apiMetadata/County.csv')
+characteristic_file_path = os.path.expanduser(BASE_URL+'/apiMetadata/Characteristic.csv')
+aperture_characteristics_file_paths_file_path = os.path.expanduser(BASE_URL+'/apiMetadata/CharacteristicsInAperture.json')
 
 
-def getEndpoint(STATE_CODE, COUNTY_CODE):
-    return "https://www.waterqualitydata.us/data/Result/search?countycode=US%3A"+STATE_CODE+"%3A"+COUNTY_CODE+"&mimeType=csv"
+# This works!!!
+test = "https://www.waterqualitydata.us/data/Result/search?countycode=US%3A08%3A069&characteristicName=Calcium&mimeType=csv"
+
+
+def getEndpoint(STATE_CODE, COUNTY_CODE, CHARACTERISTIC):
+    return "https://www.waterqualitydata.us/data/Result/search?countycode=US%3A"+STATE_CODE+"%3A"+COUNTY_CODE+"&characteristicName="+CHARACTERISTIC+"&mimeType=csv"
 
 
 def getJSON(file):
@@ -53,40 +58,47 @@ def extractCharacteristicNames():
     names = []
     for entry in jsonObject:
         names.append(entry['name'])
+    return names
 
 
 def getCharacterstics():
-    characteristicGroups = ['Physical', 'Radiochemical', 'Stable Isotopes']
+    characteristicNames = extractCharacteristicNames()
     characteristicInfo = []
     with open(characteristic_file_path, newline='') as csvfile:
         reader = csv.DictReader(csvfile)
         for row in reader:
-            if row['Group Name'] in characteristicGroups:
+            if row['Name'] in characteristicNames:
                 characteristicInfo.append(row['Name'])
     return characteristicInfo
 
 
 def getDataForUSA():
     stateFIPS = getStateCodeList()
+    characteristics = getCharacterstics()
     for state in stateFIPS:
         counties = getCountyCodeForState(state['Code'])
         for county in counties:
-            endpoint = getEndpoint(state['FIPS'], county)
-            # Make a call to the endpoint
+            for characteristic in characteristics:
+                # Make a call to the endpoint, store result
+                endpoint = getEndpoint(state['FIPS'], county, characteristic)
+                response = requests.get(endpoint)
+                decoded_content = response.content.decode('utf-8')
 
 
 def getDataForColorado():
+    characteristics = getCharacterstics()
     counties = getCountyCodeForState('CO')
     for county in counties:
-        endpoint = getEndpoint('CO', county)
-        print(endpoint)
-        # Make a call to the endpoint
+        for characteristic in characteristics:
+            endpoint = getEndpoint('CO', county, characteristic)
+            # Make a call to the endpoint, store result
 
 
 def main():
     print("Hello World")
-    getDataForColorado()
-    # getDataForUSA()
+    # test_call = "https://www.waterqualitydata.us/data/Result/search?countycode=US%3A08%3A069&characteristicName=Calcium&mimeType=csv"
+    # response = requests.get(test_call)
+    # print(response)
 
 
 if __name__ == "__main__":

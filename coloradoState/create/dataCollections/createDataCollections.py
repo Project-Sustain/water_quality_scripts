@@ -1,6 +1,8 @@
 
-import sys
-sys.path.insert(0, '/s/parsons/b/others/sustain/matt/water_quality/coloradoState/create')
+PATH_BASE = '/s/parsons/b/others/sustain/matt/water_quality/coloradoState'
+
+import os, sys
+sys.path.insert(0, PATH_BASE+'/create')
 import utils
 
 pointData = "co_water_quality_point_data.json"
@@ -9,11 +11,17 @@ riversAndStreams = "co_water_quality_rivers_and_streams.json"
 errorFile = "error.txt"
 progressFile = "progress.txt"
 
+site_to_line_map_file_path = os.path.expanduser(PATH_BASE+'/create/dataMaps/lineMap/siteToLineMap.json')
+site_to_polygon_map_file_path = os.path.expanduser(PATH_BASE+'/create/dataMaps/polygonMap/siteToPolygonMap.json')
+co_water_data_file_path = os.path.expanduser(PATH_BASE+'/download/data/data.json')
+
 
 def createCollections():
-    siteToLineMap = utils.getJSON('siteToLineMap.json')
-    siteToPolygonMap = utils.getJSON('siteToPolygonMap.json')
-    water_quality_data, count = utils.getCollection("co_water_quality_data")
+    siteToLineMap = utils.getJSON(site_to_line_map_file_path)
+    siteToPolygonMap = utils.getJSON(site_to_polygon_map_file_path)
+    # water_quality_data, count = utils.getCollection("co_water_quality_data")
+    water_quality_data = utils.getJSON(co_water_data_file_path)
+    count = len(water_quality_data)
 
     current_index = 0
     progress_output = open(progressFile, "a")
