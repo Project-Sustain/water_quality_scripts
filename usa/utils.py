@@ -1,5 +1,6 @@
 
 import os, json, pymongo
+from datetime import datetime
 
 
 waterways = [
@@ -32,6 +33,10 @@ waterways = [
 ]
 
 
+def getTimestamp():
+    return '[' + datetime.now().strftime("%m/%d/%Y %H:%M:%S") + ']'
+
+
 def getJSON(file):
     f = open(file)
     jsonObject = json.load(f)
@@ -55,6 +60,20 @@ def getColoradoStateCoordinates():
     return coordinates
 
 
+def handleProgress(index, count, outputFile, interval=10000, precision=2):
+    if index % interval == 0:
+        percent_done = round((index / count) * 100, precision)
+        progress_message = f'{getTimestamp()} {percent_done}% {index}/{count}'
+        print(progress_message)
+        with open(outputFile, 'a') as output:
+            output.write(progress_message + "\n")
+    if index == count:
+        progress_message = f'{getTimestamp()} 100% {index}/{count}'
+        print(progress_message)
+        with open(outputFile, 'a') as output:
+            output.write(progress_message + "\n")
+
+
 def formatAndWriteData(document, file):
     if '_id' in document:
         del document['_id']
@@ -71,10 +90,6 @@ def formatStartOfFile(file):
 
 
 def formatEndOfFile(file):
-    with open(file, 'rb+') as filehandle:   
-        filehandle.seek(-2, os.SEEK_END)
-        filehandle.truncate()
-
-    outputFile = open(file, "a")
-    outputFile.write('\n]')
-    outputFile.close()
+    file.seek(-2, os.SEEK_END)
+    file.truncate()
+    file.write('\n]')

@@ -1,8 +1,11 @@
 
-import csv, os
+import csv, os, sys
 
 PATH_BASE = '/s/parsons/b/others/sustain/matt/water_quality/usa/download'
-processFile = 'process.csv'
+progressFile = 'progress.csv'
+
+sys.path.insert(0, '/s/parsons/b/others/sustain/matt/water_quality/usa')
+import utils
 
 
 def getColumnNames(fileName):
@@ -32,10 +35,7 @@ def writeColumnHeader(columnNames, file):
 
 
 def combineCsv(files, outputFile):
-    processWriter = open(processFile, 'a')
     writer = open(outputFile, 'a')
-    fileCounter = 0
-    totalFiles = len(files)
     for file in files:
         reader = open(file, 'r')
         lines = reader.readlines()
@@ -44,28 +44,20 @@ def combineCsv(files, outputFile):
             if index > 0:
                 writer.write(line)
             lineCounter += 1
-            lineProcessMessage = f'{(lineCounter / len(lines)) * 100}% of Lines Processed for Current File'
-            processWriter.write(lineProcessMessage)
-            print(lineProcessMessage)
-        writer.write("\n")
+            utils.handleProgress(lineCounter, len(lines), progressFile)
         reader.close()
+        print('File Finished Processing')
 
-        fileCounter += 1
-        filePercentage = (fileCounter / totalFiles) * 100
-        fileProcessMessage = f'**** {filePercentage}% of Files Processed ****'
-        processWriter.write(fileProcessMessage)
-        print(fileProcessMessage)
 
     writer.close()
-    processWriter.close()
 
 
 def main():
     print("Hello World")
 
-    directory = os.path.expanduser(PATH_BASE+'/data')
-    headerInput = os.path.expanduser(PATH_BASE+'/data/alabama.csv')
-    outputFile = os.path.expanduser('combinedCsvData.csv')
+    directory = os.path.expanduser(PATH_BASE+'/data/batch2')
+    headerInput = os.path.expanduser(PATH_BASE+'/data/batch2/caliPart1.csv')
+    outputFile = os.path.expanduser(PATH_BASE+'/data/combinedData/combinedBatch2.csv')
 
     columnNames = getColumnNames(headerInput)   
     writeColumnHeader(columnNames, outputFile)
