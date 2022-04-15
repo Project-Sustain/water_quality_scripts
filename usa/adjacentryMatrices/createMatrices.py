@@ -1,5 +1,6 @@
 
 import json, sys, pymongo
+from pymongo.errors import CursorNotFound
 sys.path.insert(0, '/s/parsons/b/others/sustain/matt/water_quality/usa')
 import utils
 
@@ -31,14 +32,21 @@ def createSitePolygonMatrix():
 
                 utils.handleProgress(index, count, 'polygonProgress.txt', 1, 6)
 
-    except Exception as e:
+    except CursorNotFound as e:
         with open('polygonErrors.txt', 'a') as f:
             f.write(utils.getTimestamp())
-            f.write(str(e))
+            f.write(json.dumps(e.details, indent=4))
             f.write('\n')
-            print(e)
-            print('Recursing...')
-            createSitePolygonMatrix()
+        print(utils.getTimestamp() + ' ' + e)
+        print('Recursing...')
+        createSitePolygonMatrix()
+
+    except:
+        with open('polygonErrors.txt', 'a') as f:
+            f.write(utils.getTimestamp() + ' Unknown Exception\n')
+        print(utils.getTimestamp() + ' Unknown error caught, recursing...')
+        polygonCursor.close()
+        createSitePolygonMatrix()
         
     outputFile.close()
     polygonCursor.close()
@@ -133,14 +141,21 @@ def createSiteLineMatrix():
 
                 utils.handleProgress(index, count, 'lineProgress.txt', 1, 6)
 
-    except Exception as e:
-        with open('lineErrors.txt', 'a') as f:
+    except CursorNotFound as e:
+        with open('polygonErrors.txt', 'a') as f:
             f.write(utils.getTimestamp())
-            f.write(str(e))
+            f.write(json.dumps(e.details, indent=4))
             f.write('\n')
-            print(e)
-            print('Recursing...')
-            createSiteLineMatrix()
+        print(utils.getTimestamp() + ' ' + e)
+        print('Recursing...')
+        createSitePolygonMatrix()
+
+    except:
+        with open('polygonErrors.txt', 'a') as f:
+            f.write(utils.getTimestamp() + ' Unknown Exception\n')
+        print(utils.getTimestamp() + ' Unknown error caught, recursing...')
+        lineCursor.close()
+        createSitePolygonMatrix()
 
     utils.formatEndOfFile(outputFile)
     lineCursor.close()
