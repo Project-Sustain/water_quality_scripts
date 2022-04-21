@@ -5,3 +5,4 @@ larimerCounty/
 *.pyc
 *.geojson
 *.zip
+*.log

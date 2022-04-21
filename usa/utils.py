@@ -1,4 +1,5 @@
 
+import logging
 import os, json, pymongo
 from datetime import datetime
 
@@ -89,7 +90,16 @@ def formatStartOfFile(file):
     outputFile.close()
 
 
-def formatEndOfFile(file):
-    file.seek(-2, os.SEEK_END)
-    file.truncate()
-    file.write('\n]')
+def logProgress(documentsProcessedByThisThread, totalDocumentsForThisThread, outputFile, threadNumber):
+    percent_done = round((documentsProcessedByThisThread / (totalDocumentsForThisThread)) * 100, 5)
+    message = f'{getTimestamp()} [Thread-{threadNumber}] {percent_done}% {documentsProcessedByThisThread}/{totalDocumentsForThisThread}'
+    print(message)
+    with open(outputFile, 'a') as output:
+        output.write(message + '\n')
+
+
+def logError(logger, e, threadNumber):
+    errorMessage = f'{getTimestamp()} [Thread-{threadNumber}] {e}'
+    logger.log(logging.ERROR, errorMessage)
+    print(errorMessage)
+    

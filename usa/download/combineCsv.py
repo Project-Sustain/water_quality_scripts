@@ -55,9 +55,9 @@ def combineCsv(files, outputFile):
 def main():
     print("Hello World")
 
-    directory = os.path.expanduser(PATH_BASE+'/data/batch2')
-    headerInput = os.path.expanduser(PATH_BASE+'/data/batch2/caliPart1.csv')
-    outputFile = os.path.expanduser(PATH_BASE+'/data/combinedData/combinedBatch2.csv')
+    directory = os.path.expanduser(PATH_BASE+'/data/batch3')
+    headerInput = os.path.expanduser(PATH_BASE+'/data/batch3/washington.csv')
+    outputFile = os.path.expanduser(PATH_BASE+'/data/combinedData/combinedBatch3.csv')
 
     columnNames = getColumnNames(headerInput)   
     writeColumnHeader(columnNames, outputFile)
