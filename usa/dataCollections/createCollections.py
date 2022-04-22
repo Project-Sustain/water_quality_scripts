@@ -18,8 +18,8 @@ PROGRESS_BASE = PATH_BASE+'/dataCollections/progressFiles'
 
 def createCollections(threadNumber, NUM_THREADS, batch):
 
-    site_line_matrix = os.path.expanduser(PATH_BASE+'/adjacentryMatrices/siteLineMatrix.json') # Move this file
-    site_polygon_matrix = os.path.expanduser(PATH_BASE+'/adjacentryMatrices/sitePolygonMatrix.json') # Move this file
+    site_line_matrix = os.path.expanduser(PATH_BASE+'/adjacentryMatrices/siteLineMatrix.json')
+    site_polygon_matrix = os.path.expanduser(PATH_BASE+'/adjacentryMatrices/sitePolygonMatrix.json')
     water_data_file_path = os.path.expanduser(PATH_BASE+'/download/data/combinedData/' + batch)
 
     errorFile = os.path.expanduser(PATH_BASE+'/dataCollections/error.log')
@@ -34,8 +34,10 @@ def createCollections(threadNumber, NUM_THREADS, batch):
     riversAndStreamsCollection = db['water_quality_rivers_and_streams']
     bodiesOfWaterCollection = db['water_quality_bodies_of_water']
 
+    # Should I be loading these into memory? They're 25MB combined
     siteToLineMap = utils.getJSON(site_line_matrix)
     siteToPolygonMap = utils.getJSON(site_polygon_matrix)
+
     water_quality_data = utils.getJSON(water_data_file_path)
 
     documentsForThisThread = [water_quality_data[i] for i in range(len(water_quality_data)) if i == threadNumber or i%NUM_THREADS == threadNumber]
@@ -49,21 +51,17 @@ def createCollections(threadNumber, NUM_THREADS, batch):
 
             for entry in siteToPolygonMap:
                 if dataIsAssociatedWithPolygon: break
-                site_list = list(entry.values())[0]
-                for site in site_list:
-                    if site == target_site_id:
-                        document['BodyOfWater'] = list(entry.keys())[0]
-                        dataIsAssociatedWithPolygon = True
-                        break
+                if target_site_id in list(entry.values())[0]:
+                    document['BodyOfWater'] = list(entry.keys())[0]
+                    dataIsAssociatedWithPolygon = True
+                    break
 
             for entry in siteToLineMap:
                 if dataIsAssociatedWithLine or dataIsAssociatedWithPolygon: break
-                site_list = list(entry.values())[0]
-                for site in site_list:
-                    if site == target_site_id:
-                        document['BodyOfWater'] = list(entry.keys())[0]
-                        dataIsAssociatedWithLine = True
-                        break
+                if target_site_id in list(entry.values())[0]:
+                    document['BodyOfWater'] = list(entry.keys())[0]
+                    dataIsAssociatedWithLine = True
+                    break
 
             if dataIsAssociatedWithPolygon:
                 bodiesOfWaterCollection.insert_one(document)
